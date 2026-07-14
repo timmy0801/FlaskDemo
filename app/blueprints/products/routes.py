@@ -42,4 +42,4 @@ def update_product(product_id, validated_data):
 @admin_required
 def delete_product(product_id):
     product_service.delete_product(product_id)
-    return jsonify({"message": "商品已下架"})
+    return jsonify({"message": "商品已下架"}), 204

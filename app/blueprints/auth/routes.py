@@ -1,7 +1,6 @@
-from flask import request, jsonify
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask import jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity, set_refresh_cookies
 
-from app import db
 from app.models.user import User
 from app.blueprints.auth import auth_bp
 from app.blueprints.auth.schemas import RegisterSchema, LoginSchema
@@ -20,8 +19,13 @@ def register(validated_data):
 @validate_body(LoginSchema)
 def login(validated_data):
     result = auth_service.login(validated_data)
-
-    return jsonify({'message':'登入成功',**result})
+    response = jsonify({
+        'message': '登入成功',
+        'access_token': result['access_token'],
+        'user': result['user'],
+    })
+    set_refresh_cookies(response, result['refresh_token'])
+    return response
 
 
 @auth_bp.route('/me', methods=['GET'])

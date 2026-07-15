@@ -55,6 +55,8 @@ def normal_user_and_token(client, db):
 @pytest.fixture
 def csrf_header():
     def _make(client):
-        cookie = client.get_cookie("csrf_refresh_token", path="/api/auth")
+        # The csrf_refresh_token cookie is set at JWT_REFRESH_CSRF_COOKIE_PATH,
+        # which defaults to "/" (independent of JWT_REFRESH_COOKIE_PATH="/api/auth").
+        cookie = client.get_cookie("csrf_refresh_token", path="/")
         return {"X-CSRF-TOKEN": cookie.value} if cookie else {}
     return _make

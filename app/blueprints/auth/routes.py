@@ -1,5 +1,10 @@
 from flask import jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity, set_refresh_cookies
+from flask_jwt_extended import (
+    jwt_required,
+    get_jwt_identity,
+    get_jwt,
+    set_refresh_cookies,
+)
 
 from app.models.user import User
 from app.blueprints.auth import auth_bp
@@ -34,3 +39,14 @@ def get_current_user():
     user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     return jsonify(user.to_dict())
+
+
+@auth_bp.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    user_id = int(get_jwt_identity())
+    jti = get_jwt()['jti']
+    result = auth_service.refresh(user_id, jti)
+    response = jsonify({'access_token': result['access_token']})
+    set_refresh_cookies(response, result['refresh_token'])
+    return response

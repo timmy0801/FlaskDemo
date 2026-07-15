@@ -44,3 +44,27 @@ def _store_refresh_token(raw_token, user_id):
         expires_at=expires_at,
     ))
     db.session.commit()
+
+
+def refresh(user_id, jti):
+    token_record = RefreshToken.query.filter_by(jti=jti).first()
+
+    if token_record is None or token_record.revoked_at is not None:
+        RefreshToken.query.filter_by(user_id=user_id, revoked_at=None).update(
+            {'revoked_at': datetime.now(timezone.utc)}
+        )
+        db.session.commit()
+        raise UnauthorizedError('Refresh token 無效，請重新登入')
+
+    user = db.session.get(User, user_id)
+    if not user or not user.is_active:
+        raise ForbiddenError('帳號已被停用')
+
+    token_record.revoked_at = datetime.now(timezone.utc)
+
+    access_token = create_access_token(identity=str(user_id), additional_claims={'role': user.role})
+    new_refresh_token = create_refresh_token(identity=str(user_id), additional_claims={'role': user.role})
+    _store_refresh_token(new_refresh_token, user_id)
+
+    db.session.commit()
+    return {'access_token': access_token, 'refresh_token': new_refresh_token}

@@ -23,7 +23,7 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    JWT_ACCESS_TOKEN_EXPIRES = 1  # 測試時設置為 1 秒
+    JWT_ACCESS_TOKEN_EXPIRES = 300  # 測試時設置為 5 分鐘
 
 
 config_map = {

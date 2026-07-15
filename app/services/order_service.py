@@ -10,11 +10,13 @@ from app.utils.exceptions import (
     NotFoundError,
     ConflictError,
 )
+from app.utils.pagination import clamp_per_page
 
 MAX_RETRY = 3
 
 
 def get_orders(user_id, claims, page, per_page):
+    per_page = clamp_per_page(per_page)
     query = Order.query.options(
         joinedload(Order.items).joinedload(OrderItem.product)
     ).order_by(Order.created_at.desc())

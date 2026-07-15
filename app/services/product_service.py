@@ -6,6 +6,7 @@ from app.utils.exceptions import BadRequestError
 
 
 def get_products(page, per_page, category):
+    per_page = clamp_per_page(per_page)
     query = Product.query.filter_by(is_active=True)
     if category:
         query = query.filter_by(category=category)

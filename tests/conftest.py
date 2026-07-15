@@ -50,3 +50,11 @@ def admin_user_and_token(client, db):
 @pytest.fixture
 def normal_user_and_token(client, db):
     return _create_user_and_login(client, db, "user@test.com", "user12345", "user")
+
+
+@pytest.fixture
+def csrf_header():
+    def _make(client):
+        cookie = client.get_cookie("csrf_refresh_token", path="/api/auth")
+        return {"X-CSRF-TOKEN": cookie.value} if cookie else {}
+    return _make

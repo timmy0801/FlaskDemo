@@ -18,6 +18,9 @@ def create_app(env='default'):
     migrate.init_app(app, db)
     jwt.init_app(app)
 
+    from app.utils.jwt_callbacks import register_jwt_callbacks
+    register_jwt_callbacks(jwt)
+
     # 註冊 Middleware（Before / After Request）
     from app.middleware.request_logger import register_hooks
     register_hooks(app)

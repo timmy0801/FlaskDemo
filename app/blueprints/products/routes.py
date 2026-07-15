@@ -17,8 +17,11 @@ def get_products():
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
     category = request.args.get("category")
+    q = request.args.get("q")
+    sort_by = request.args.get("sort_by")
+    order = request.args.get("order")
 
-    return jsonify(product_service.get_products(page, per_page, category))
+    return jsonify(product_service.get_products(page, per_page, category, q, sort_by, order))
 
 
 @products_bp.route("/<int:product_id>", methods=["GET"])

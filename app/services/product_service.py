@@ -4,12 +4,23 @@ from app.models.inventory_log import InventoryLog
 from app.utils.pagination import clamp_per_page
 from app.utils.exceptions import BadRequestError
 
+SORTABLE_FIELDS = {
+    "price": Product.price,
+    "created_at": Product.created_at,
+}
 
-def get_products(page, per_page, category):
+
+def get_products(page, per_page, category, q=None, sort_by=None, order=None):
     per_page = clamp_per_page(per_page)
     query = Product.query.filter_by(is_active=True)
     if category:
         query = query.filter_by(category=category)
+    if q:
+        query = query.filter(Product.name.ilike(f"%{q}%"))
+
+    column = SORTABLE_FIELDS.get(sort_by, Product.created_at)
+    query = query.order_by(column.asc() if order == "asc" else column.desc())
+
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     return {
         "products": [p.to_dict() for p in pagination.items],

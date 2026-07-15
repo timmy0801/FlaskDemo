@@ -127,7 +127,7 @@ def update_order_status(order_id, data, user_id, claims):
         if new_status != "cancelled":
             raise ForbiddenError("只能將訂單狀態改為 cancelled")
 
-    if new_status == "cancelled" and order.status != "cancelld":
+    if new_status == "cancelled" and order.status != "cancelled":
         _restock_order_items(order)
     order.status = new_status
     db.session.commit()

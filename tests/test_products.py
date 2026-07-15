@@ -58,3 +58,20 @@ def test_soft_deleted_product_excluded_from_list(
     list_resp = client.get("/api/products")
     ids = [p["id"] for p in list_resp.get_json()["products"]]
     assert product_id not in ids
+
+
+def test_product_created_at_is_set_per_instance(db):
+    import time
+    from app.models.product import Product
+
+    p1 = Product(name='A', price=10, stock=1)
+    db.session.add(p1)
+    db.session.commit()
+
+    time.sleep(0.01)
+
+    p2 = Product(name='B', price=10, stock=1)
+    db.session.add(p2)
+    db.session.commit()
+
+    assert p1.created_at != p2.created_at

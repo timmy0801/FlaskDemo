@@ -14,8 +14,8 @@ class Product(db.Model):
     image_url = db.Column(db.String(500))
     is_active = db.Column(db.Boolean, default=True)
     version = db.Column(db.Integer, default=0, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     UPDATABLE_FIELDS = ('name', 'description', 'price', 'stock', 'category', 'image_url', 'is_active')
 

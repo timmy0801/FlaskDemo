@@ -4,6 +4,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_jwt,
     set_refresh_cookies,
+    unset_jwt_cookies,
 )
 
 from app.models.user import User
@@ -49,4 +50,14 @@ def refresh():
     result = auth_service.refresh(user_id, jti)
     response = jsonify({'access_token': result['access_token']})
     set_refresh_cookies(response, result['refresh_token'])
+    return response
+
+
+@auth_bp.route('/logout', methods=['POST'])
+@jwt_required(refresh=True)
+def logout():
+    jti = get_jwt()['jti']
+    auth_service.logout(jti)
+    response = jsonify({'message': '登出成功'})
+    unset_jwt_cookies(response)
     return response

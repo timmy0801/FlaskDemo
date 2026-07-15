@@ -68,3 +68,10 @@ def refresh(user_id, jti):
 
     db.session.commit()
     return {'access_token': access_token, 'refresh_token': new_refresh_token}
+
+
+def logout(jti):
+    token_record = RefreshToken.query.filter_by(jti=jti).first()
+    if token_record and token_record.revoked_at is None:
+        token_record.revoked_at = datetime.now(timezone.utc)
+        db.session.commit()

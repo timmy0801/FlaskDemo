@@ -130,3 +130,38 @@ def test_refresh_rejected_for_deactivated_user(client, db, csrf_header):
 
     resp = client.post('/api/auth/refresh', headers=csrf_header(client))
     assert resp.status_code == 403
+
+
+def test_logout_revokes_token_and_clears_cookie(client, db, csrf_header):
+    from app.models.user import User
+    from app.models.refresh_token import RefreshToken
+
+    user = User(username='logoutuser', email='logout@test.com', role='user')
+    user.set_password('password123')
+    db.session.add(user)
+    db.session.commit()
+
+    client.post('/api/auth/login', json={'email': 'logout@test.com', 'password': 'password123'})
+
+    resp = client.post('/api/auth/logout', headers=csrf_header(client))
+    assert resp.status_code == 200
+
+    tokens = RefreshToken.query.filter_by(user_id=user.id).all()
+    assert all(t.revoked_at is not None for t in tokens)
+    assert client.get_cookie('refresh_token_cookie', path='/api/auth') is None
+
+
+def test_refresh_after_logout_returns_401(client, db, csrf_header):
+    from app.models.user import User
+
+    user = User(username='postlogoutuser', email='postlogout@test.com', role='user')
+    user.set_password('password123')
+    db.session.add(user)
+    db.session.commit()
+
+    client.post('/api/auth/login', json={'email': 'postlogout@test.com', 'password': 'password123'})
+    headers = csrf_header(client)
+    client.post('/api/auth/logout', headers=headers)
+
+    resp = client.post('/api/auth/refresh', headers=headers)
+    assert resp.status_code == 401

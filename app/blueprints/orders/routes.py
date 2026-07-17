@@ -138,6 +138,8 @@ def update_order_status(order_id, validated_data):
           description: 請求格式錯誤，或只有待處理（pending）的訂單可以取消
         403:
           description: 無權限修改此訂單狀態
+        404:
+          description: 訂單不存在
     """
     user_id = int(get_jwt_identity())
     claims = get_jwt()

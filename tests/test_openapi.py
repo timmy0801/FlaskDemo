@@ -28,3 +28,11 @@ def test_openapi_includes_product_paths(client):
     assert '/api/products' in paths
     assert '/api/products/{product_id}' in paths
     assert '/api/products/{product_id}/inventory-logs' in paths
+
+
+def test_openapi_includes_order_paths(client):
+    resp = client.get('/api/openapi.json')
+    paths = resp.get_json()['paths']
+    assert '/api/orders' in paths
+    assert '/api/orders/{order_id}' in paths
+    assert '/api/orders/{order_id}/status' in paths

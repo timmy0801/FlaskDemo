@@ -26,3 +26,6 @@ SQLAlchemy==2.0.51
 typing_extensions==4.15.0
 tzdata==2026.2
 Werkzeug==3.1.8
+apispec==6.10.0
+apispec-webframeworks==1.2.0
+flask-swagger-ui==5.32.8

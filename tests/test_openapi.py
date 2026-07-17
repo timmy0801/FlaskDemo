@@ -36,3 +36,25 @@ def test_openapi_includes_order_paths(client):
     assert '/api/orders' in paths
     assert '/api/orders/{order_id}' in paths
     assert '/api/orders/{order_id}/status' in paths
+
+
+def test_openapi_includes_user_paths(client):
+    resp = client.get('/api/openapi.json')
+    paths = resp.get_json()['paths']
+    assert '/api/users' in paths
+    assert '/api/users/{user_id}' in paths
+
+
+def test_openapi_spec_covers_all_blueprints(client):
+    resp = client.get('/api/openapi.json')
+    paths = resp.get_json()['paths']
+    expected = [
+        '/api/auth/register', '/api/auth/login', '/api/auth/me',
+        '/api/auth/refresh', '/api/auth/logout',
+        '/api/products', '/api/products/{product_id}',
+        '/api/products/{product_id}/inventory-logs',
+        '/api/orders', '/api/orders/{order_id}', '/api/orders/{order_id}/status',
+        '/api/users', '/api/users/{user_id}',
+    ]
+    for path in expected:
+        assert path in paths, f'{path} missing from OpenAPI spec'

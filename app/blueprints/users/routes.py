@@ -129,6 +129,13 @@ def deactivate_user(user_id):
       responses:
         200:
           description: 用戶帳號已停用
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
         403:
           description: 權限不足，需要 admin 身分
         404:

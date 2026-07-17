@@ -40,6 +40,10 @@ def create_app(env='default'):
     app.register_blueprint(orders_bp, url_prefix='/api/orders')
     app.register_blueprint(users_bp, url_prefix='/api/users')
 
+    # 註冊 OpenAPI 文件（必須在所有 blueprint 註冊完之後）
+    from app.openapi import register_openapi
+    register_openapi(app)
+
     # 全域錯誤處理
     from app.middleware.error_handler import register_error_handlers
     register_error_handlers(app)

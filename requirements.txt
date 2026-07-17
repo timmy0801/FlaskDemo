@@ -27,3 +27,6 @@ typing_extensions==4.15.0
 tzdata==2026.2
 Werkzeug==3.1.8
 flask-limiter==4.1.1
+apispec==6.10.0
+apispec-webframeworks==1.2.0
+flask-swagger-ui==5.32.8

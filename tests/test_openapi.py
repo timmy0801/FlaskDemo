@@ -20,3 +20,11 @@ def test_openapi_includes_auth_paths(client):
     assert '/api/auth/me' in paths
     assert '/api/auth/refresh' in paths
     assert '/api/auth/logout' in paths
+
+
+def test_openapi_includes_product_paths(client):
+    resp = client.get('/api/openapi.json')
+    paths = resp.get_json()['paths']
+    assert '/api/products' in paths
+    assert '/api/products/{product_id}' in paths
+    assert '/api/products/{product_id}/inventory-logs' in paths

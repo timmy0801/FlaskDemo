@@ -21,6 +21,7 @@ def register(validated_data):
     ---
     post:
       summary: 註冊新帳號
+      description: Email 與使用者名稱必須是唯一的，重複註冊會被拒絕。
       tags: [Auth]
       requestBody:
         required: true
@@ -32,13 +33,9 @@ def register(validated_data):
           description: 註冊成功
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  user:
-                    $ref: '#/components/schemas/UserResponse'
+              schema: RegisterResponseSchema
+        400:
+          description: 請求格式錯誤
         409:
           description: Email 或使用者名稱已被使用
     """
@@ -66,6 +63,8 @@ def login(validated_data):
           content:
             application/json:
               schema: LoginResponseSchema
+        400:
+          description: 請求格式錯誤
         401:
           description: Email 或密碼錯誤
         403:
@@ -99,6 +98,8 @@ def get_current_user():
               schema: UserResponseSchema
         401:
           description: 未攜帶或無效的 access token
+        404:
+          description: 使用者不存在
     """
     user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)

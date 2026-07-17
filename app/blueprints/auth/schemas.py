@@ -24,3 +24,8 @@ class LoginResponseSchema(Schema):
     message = fields.Str()
     access_token = fields.Str()
     user = fields.Nested(UserResponseSchema)
+
+
+class RegisterResponseSchema(Schema):
+    message = fields.Str()
+    user = fields.Nested(UserResponseSchema)

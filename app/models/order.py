@@ -10,8 +10,8 @@ class Order(db.Model):
     status = db.Column(db.String(20), default='pending')
     # status: pending / paid / shipped / delivered / cancelled
     total_amount = db.Column(db.Float, default=0.0)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
 

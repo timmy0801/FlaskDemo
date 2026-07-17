@@ -70,3 +70,22 @@ def test_admin_can_update_order_status(client, db, admin_user_and_token, auth_he
     )
     assert resp.status_code == 200
     assert resp.get_json()["order"]["status"] == "paid"
+
+
+def test_order_created_at_is_set_per_instance(db, normal_user_and_token):
+    import time
+    from app.models.order import Order
+
+    user, _ = normal_user_and_token
+
+    o1 = Order(user_id=user.id)
+    db.session.add(o1)
+    db.session.commit()
+
+    time.sleep(0.01)
+
+    o2 = Order(user_id=user.id)
+    db.session.add(o2)
+    db.session.commit()
+
+    assert o1.created_at != o2.created_at

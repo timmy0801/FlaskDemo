@@ -33,3 +33,22 @@ def test_non_owner_cannot_update_others_profile(
         headers=auth_header(user_token),
     )
     assert resp.status_code == 403
+
+
+def test_user_created_at_is_set_per_instance(db):
+    import time
+    from app.models.user import User
+
+    u1 = User(username='timeuser1', email='timeuser1@test.com')
+    u1.set_password('password123')
+    db.session.add(u1)
+    db.session.commit()
+
+    time.sleep(0.01)
+
+    u2 = User(username='timeuser2', email='timeuser2@test.com')
+    u2.set_password('password123')
+    db.session.add(u2)
+    db.session.commit()
+
+    assert u1.created_at != u2.created_at

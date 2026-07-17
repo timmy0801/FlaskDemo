@@ -26,3 +26,4 @@ SQLAlchemy==2.0.51
 typing_extensions==4.15.0
 tzdata==2026.2
 Werkzeug==3.1.8
+flask-limiter==4.1.1

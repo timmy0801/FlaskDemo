@@ -1,6 +1,14 @@
 from flask import jsonify
 from app.utils.exceptions import AppError
-from werkzeug.exceptions import NotFound, MethodNotAllowed, BadRequest, Unauthorized, Forbidden, InternalServerError
+from werkzeug.exceptions import (
+    NotFound,
+    MethodNotAllowed,
+    BadRequest,
+    Unauthorized,
+    Forbidden,
+    InternalServerError,
+    TooManyRequests,
+)
 
 
 def register_error_handlers(app):
@@ -20,6 +28,10 @@ def register_error_handlers(app):
     @app.errorhandler(Forbidden)
     def handle_forbidden(e):
         return jsonify({'error': '權限不足'}), 403
+
+    @app.errorhandler(TooManyRequests)
+    def handle_too_many_requests(e):
+        return jsonify({'error': '請求過於頻繁，請稍後再試'}), 429
 
     @app.errorhandler(NotFound)
     def handle_not_found(e):

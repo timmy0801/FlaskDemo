@@ -2,12 +2,15 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from config import config_map
 
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
+limiter = Limiter(key_func=get_remote_address, storage_uri='memory://')
 
 
 def create_app(env='default'):
@@ -17,6 +20,7 @@ def create_app(env='default'):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
+    limiter.init_app(app)
 
     from app.utils.jwt_callbacks import register_jwt_callbacks
     register_jwt_callbacks(jwt)

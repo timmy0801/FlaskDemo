@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
@@ -6,7 +6,9 @@ from flask_jwt_extended import (
     set_refresh_cookies,
     unset_jwt_cookies,
 )
+from flask_limiter.util import get_remote_address
 
+from app import limiter
 from app.models.user import User
 from app.blueprints.auth import auth_bp
 from app.blueprints.auth.schemas import RegisterSchema, LoginSchema
@@ -14,7 +16,13 @@ from app.services import auth_service
 from app.utils.decorators import validate_body
 
 
+def _login_rate_limit_key():
+    data = request.get_json(silent=True) or {}
+    return f'{get_remote_address()}:{data.get("email", "")}'
+
+
 @auth_bp.route('/register', methods=['POST'])
+@limiter.limit('5 per hour')
 @validate_body(RegisterSchema)
 def register(validated_data):
     user = auth_service.register(validated_data)
@@ -22,6 +30,7 @@ def register(validated_data):
 
 
 @auth_bp.route('/login', methods=['POST'])
+@limiter.limit('5 per minute', key_func=_login_rate_limit_key)
 @validate_body(LoginSchema)
 def login(validated_data):
     result = auth_service.login(validated_data)

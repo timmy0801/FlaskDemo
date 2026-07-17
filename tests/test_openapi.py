@@ -10,3 +10,13 @@ def test_docs_page_returns_html(client):
     resp = client.get('/api/docs/')
     assert resp.status_code == 200
     assert 'text/html' in resp.content_type
+
+
+def test_openapi_includes_auth_paths(client):
+    resp = client.get('/api/openapi.json')
+    paths = resp.get_json()['paths']
+    assert '/api/auth/register' in paths
+    assert '/api/auth/login' in paths
+    assert '/api/auth/me' in paths
+    assert '/api/auth/refresh' in paths
+    assert '/api/auth/logout' in paths

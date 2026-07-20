@@ -61,7 +61,7 @@ def test_user_cannot_set_non_cancelled_status(
 
     resp = client.patch(
         f"/api/orders/{order_id}/status",
-        json={"status": "shipped"},
+        json={"status": "paid"},
         headers=auth_header(token),
     )
     assert resp.status_code == 403

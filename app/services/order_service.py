@@ -13,6 +13,13 @@ from app.utils.exceptions import (
 from app.utils.pagination import clamp_per_page
 
 MAX_RETRY = 3
+ALLOWED_TRANSITIONS = {
+    "pending": {"paid", "cancelled"},
+    "paid": {"shipped", "cancelled"},
+    "shipped": {"delivered", "cancelled"},
+    "delivered": set(),
+    "cancelled": set(),
+}
 
 
 def get_orders(user_id, claims, page, per_page):
@@ -118,6 +125,12 @@ def update_order_status(order_id, data, user_id, claims):
         .first_or_404()
     )
     new_status = data["status"]
+    if new_status == order.status:
+        return order.to_dict()
+
+    allowed = ALLOWED_TRANSITIONS.get(order.status, set())
+    if new_status not in allowed:
+        raise BadRequestError(f"無效的訂單狀態轉換: {order.status} -> {new_status}")
     is_admin = claims.get("role") == "admin"
     if not is_admin:
         if order.user_id != user_id:

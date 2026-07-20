@@ -89,3 +89,145 @@ def test_order_created_at_is_set_per_instance(db, normal_user_and_token):
     db.session.commit()
 
     assert o1.created_at != o2.created_at
+
+
+def test_cancelled_order_cannot_be_changed_to_pending(
+    client, db, admin_user_and_token, auth_header
+):
+    _, token = admin_user_and_token
+    product = _create_product(db, stock=10)
+
+    create_resp = client.post(
+        "/api/orders",
+        json={"items": [{"product_id": product.id, "quantity": 1}]},
+        headers=auth_header(token),
+    )
+    order_id = create_resp.get_json()["order"]["id"]
+
+    # update order status to cancelled
+    cancel_resp = client.patch(
+        f"/api/orders/{order_id}/status",
+        json={"status": "cancelled"},
+        headers=auth_header(token),
+    )
+
+    # Try to change the status back to pending
+    resp = client.patch(
+        f"/api/orders/{order_id}/status",
+        json={"status": "pending"},
+        headers=auth_header(token),
+    )
+    assert resp.status_code == 400
+
+
+def test_pending_cannot_skip_to_shipped(client, db, admin_user_and_token, auth_header):
+    _, token = admin_user_and_token
+    product = _create_product(db, stock=10)
+
+    create_resp = client.post(
+        "/api/orders",
+        json={"items": [{"product_id": product.id, "quantity": 1}]},
+        headers=auth_header(token),
+    )
+    order_id = create_resp.get_json()["order"]["id"]
+
+    # Try to change the status directly to shipped
+    resp = client.patch(
+        f"/api/orders/{order_id}/status",
+        json={"status": "shipped"},
+        headers=auth_header(token),
+    )
+    assert resp.status_code == 400
+
+
+def test_delivered_cannot_be_cancelled(client, db, admin_user_and_token, auth_header):
+    _, token = admin_user_and_token
+    product = _create_product(db, stock=10)
+    create_resp = client.post(
+        "/api/orders",
+        json={"items": [{"product_id": product.id, "quantity": 1}]},
+        headers=auth_header(token),
+    )
+    order_id = create_resp.get_json()["order"]["id"]
+
+    for status in ("paid", "shipped", "delivered"):
+        client.patch(
+            f"/api/orders/{order_id}/status",
+            json={"status": status},
+            headers=auth_header(token),
+        )
+
+    resp = client.patch(
+        f"/api/orders/{order_id}/status",
+        json={"status": "cancelled"},
+        headers=auth_header(token),
+    )
+    assert resp.status_code == 400
+
+
+def test_same_status_is_idempotent(client, db, admin_user_and_token, auth_header):
+    _, token = admin_user_and_token
+    product = _create_product(db, stock=10)
+    create_resp = client.post(
+        "/api/orders",
+        json={"items": [{"product_id": product.id, "quantity": 1}]},
+        headers=auth_header(token),
+    )
+    order_id = create_resp.get_json()["order"]["id"]
+
+    resp = client.patch(
+        f"/api/orders/{order_id}/status",
+        json={"status": "pending"},
+        headers=auth_header(token),
+    )
+    assert resp.status_code == 200
+
+
+def test_double_cancel_does_not_restock_twice(
+    client, db, admin_user_and_token, auth_header
+):
+    _, token = admin_user_and_token
+    product = _create_product(db, stock=10)
+    create_resp = client.post(
+        "/api/orders",
+        json={"items": [{"product_id": product.id, "quantity": 3}]},
+        headers=auth_header(token),
+    )
+    order_id = create_resp.get_json()["order"]["id"]
+
+    client.patch(
+        f"/api/orders/{order_id}/status",
+        json={"status": "cancelled"},
+        headers=auth_header(token),
+    )
+    db.session.refresh(product)
+    stock_after_first_cancel = product.stock
+
+    resp = client.patch(
+        f"/api/orders/{order_id}/status",
+        json={"status": "cancelled"},
+        headers=auth_header(token),
+    )
+    assert resp.status_code == 200
+    db.session.refresh(product)
+    assert product.stock == stock_after_first_cancel  # 沒有再回補
+
+
+def test_full_order_lifecycle(client, db, admin_user_and_token, auth_header):
+    _, token = admin_user_and_token
+    product = _create_product(db, stock=10)
+    create_resp = client.post(
+        "/api/orders",
+        json={"items": [{"product_id": product.id, "quantity": 1}]},
+        headers=auth_header(token),
+    )
+    order_id = create_resp.get_json()["order"]["id"]
+
+    for status in ("paid", "shipped", "delivered"):
+        resp = client.patch(
+            f"/api/orders/{order_id}/status",
+            json={"status": status},
+            headers=auth_header(token),
+        )
+        assert resp.status_code == 200
+        assert resp.get_json()["order"]["status"] == status

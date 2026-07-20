@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -26,6 +27,15 @@ def create_app(env="default"):
     migrate.init_app(app, db)
     jwt.init_app(app)
     limiter.init_app(app)
+    CORS(
+        app,
+        resources={
+            r"/api/*": {
+                "origins": app.config["CORS_ORIGINS"],
+                "supports_credentials": True,
+            }
+        },
+    )
 
     from app.utils.jwt_callbacks import register_jwt_callbacks
 

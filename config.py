@@ -17,6 +17,9 @@ class Config:
     JWT_REFRESH_COOKIE_PATH = "/api/auth"
     JWT_COOKIE_SAMESITE = "Strict"
     JWT_COOKIE_SECURE = False  # Dev/Testing 沒有 HTTPS
+    CORS_ORIGINS = os.getenv(
+        "CORS_ORIGINS", "http://localhost:3000,http://localhost:5173"
+    ).split(",")
 
 
 class DevelopmentConfig(Config):

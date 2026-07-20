@@ -56,7 +56,9 @@ def get_products():
     sort_by = request.args.get("sort_by")
     order = request.args.get("order")
 
-    return jsonify(product_service.get_products(page, per_page, category, q, sort_by, order))
+    return jsonify(
+        product_service.get_products(page, per_page, category, q, sort_by, order)
+    )
 
 
 @products_bp.route("/<int:product_id>", methods=["GET"])
@@ -176,7 +178,7 @@ def delete_product(product_id):
           description: 商品不存在
     """
     product_service.delete_product(product_id)
-    return jsonify({"message": "商品已下架"}), 204
+    return "", 204
 
 
 @products_bp.route("/<int:product_id>/inventory-logs", methods=["GET"])

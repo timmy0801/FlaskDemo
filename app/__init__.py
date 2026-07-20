@@ -10,12 +10,17 @@ from config import config_map
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
-limiter = Limiter(key_func=get_remote_address, storage_uri='memory://')
+limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
 
 
-def create_app(env='default'):
+def create_app(env="default"):
     app = Flask(__name__)
     app.config.from_object(config_map[env])
+
+    if env == "production":
+        for key in ("SECRET_KEY", "JWT_SECRET_KEY"):
+            if not app.config.get(key):
+                raise RuntimeError(f"{key} must be set and non-empty in production")
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -23,10 +28,12 @@ def create_app(env='default'):
     limiter.init_app(app)
 
     from app.utils.jwt_callbacks import register_jwt_callbacks
+
     register_jwt_callbacks(jwt)
 
     # 註冊 Middleware（Before / After Request）
     from app.middleware.request_logger import register_hooks
+
     register_hooks(app)
 
     # 註冊 Blueprint
@@ -35,21 +42,24 @@ def create_app(env='default'):
     from app.blueprints.orders import orders_bp
     from app.blueprints.users import users_bp
 
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(products_bp, url_prefix='/api/products')
-    app.register_blueprint(orders_bp, url_prefix='/api/orders')
-    app.register_blueprint(users_bp, url_prefix='/api/users')
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(products_bp, url_prefix="/api/products")
+    app.register_blueprint(orders_bp, url_prefix="/api/orders")
+    app.register_blueprint(users_bp, url_prefix="/api/users")
 
     # 註冊 OpenAPI 文件（必須在所有 blueprint 註冊完之後）
     from app.openapi import register_openapi
+
     register_openapi(app)
 
     # 全域錯誤處理
     from app.middleware.error_handler import register_error_handlers
+
     register_error_handlers(app)
 
     # 註冊 CLI 指令
     from app.commands import register_commands
+
     register_commands(app)
 
     return app

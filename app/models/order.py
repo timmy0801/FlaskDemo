@@ -37,7 +37,7 @@ class Order(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "status": self.status,
-            "total_amount": self.total_amount,
+            "total_amount": float(self.total_amount) if self.total_amount else 0,
             "items": [item.to_dict() for item in self.items],
             "created_at": self.created_at.isoformat(),
         }

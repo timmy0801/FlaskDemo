@@ -138,15 +138,24 @@ def _restock_order_items(order):
     for item in order.items:
         product = item.product
         quantity_before = product.stock
-        product.stock = quantity_before + item.quantity
-        product.version += 1
+
+        updated_rows = Product.query.filter_by(
+            id=product.id, version=product.version
+        ).update(
+            {"stock": product.stock + item.quantity, "version": product.version + 1}
+        )
+
+        if updated_rows == 0:
+            db.session.rollback()
+            raise ConflictError("庫存競爭衝突，請稍後再試")
+
         db.session.add(
             InventoryLog(
                 product_id=product.id,
                 action="restock",
                 quantity_before=quantity_before,
                 quantity_change=item.quantity,
-                quantity_after=product.stock,
+                quantity_after=quantity_before + item.quantity,
                 note=f"訂單取消, 庫存回補 (訂單 ID: {order.id})",
             )
         )

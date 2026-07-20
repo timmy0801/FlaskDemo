@@ -21,7 +21,7 @@ class InventoryLog(db.Model):
     quantity_change = db.Column(db.Integer, nullable=False)  # 負數為扣除
     quantity_after = db.Column(db.Integer, nullable=False)
     note = db.Column(db.String(255), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     product = db.relationship(
         "Product", backref=db.backref("inventory_logs", lazy=True)

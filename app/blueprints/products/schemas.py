@@ -3,7 +3,9 @@ from marshmallow import Schema, fields, validate
 
 class CreateProductSchema(Schema):
     name = fields.Str(required=True, validate=validate.Length(min=1, max=200))
-    price = fields.Float(required=True, validate=validate.Range(min=0.01))
+    price = fields.Decimal(
+        required=True, validate=validate.Range(min=0.01), as_string=True
+    )
     stock = fields.Int(load_default=0, validate=validate.Range(min=0))
     category = fields.Str(load_default=None)
     description = fields.Str(load_default=None)
@@ -12,7 +14,7 @@ class CreateProductSchema(Schema):
 
 class UpdateProductSchema(Schema):
     name = fields.Str(validate=validate.Length(min=1, max=200))
-    price = fields.Float(validate=validate.Range(min=0.01))
+    price = fields.Decimal(validate=validate.Range(min=0.01), as_string=True)
     stock = fields.Int(validate=validate.Range(min=0))
     category = fields.Str()
     description = fields.Str()
@@ -30,7 +32,7 @@ class ProductResponseSchema(Schema):
     id = fields.Int()
     name = fields.Str()
     description = fields.Str(allow_none=True)
-    price = fields.Float()
+    price = fields.Decimal(as_string=True)
     stock = fields.Int()
     category = fields.Str(allow_none=True)
     image_url = fields.Str(allow_none=True)

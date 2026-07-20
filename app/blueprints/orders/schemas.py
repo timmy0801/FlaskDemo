@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, validate
 
-VALID_STATUSES = ('pending', 'paid', 'shipped', 'delivered', 'cancelled')
+VALID_STATUSES = ("pending", "paid", "shipped", "delivered", "cancelled")
 
 
 class OrderItemSchema(Schema):
@@ -10,9 +10,7 @@ class OrderItemSchema(Schema):
 
 class CreateOrderSchema(Schema):
     items = fields.List(
-        fields.Nested(OrderItemSchema),
-        required=True,
-        validate=validate.Length(min=1)
+        fields.Nested(OrderItemSchema), required=True, validate=validate.Length(min=1)
     )
 
 
@@ -25,15 +23,15 @@ class OrderItemResponseSchema(Schema):
     product_id = fields.Int()
     product_name = fields.Str(allow_none=True)
     quantity = fields.Int()
-    unit_price = fields.Float()
-    subtotal = fields.Float()
+    unit_price = fields.Decimal(as_string=True)
+    subtotal = fields.Decimal(as_string=True)
 
 
 class OrderResponseSchema(Schema):
     id = fields.Int()
     user_id = fields.Int()
     status = fields.Str()
-    total_amount = fields.Float()
+    total_amount = fields.Decimal(as_string=True)
     items = fields.List(fields.Nested(OrderItemResponseSchema))
     created_at = fields.DateTime()
 

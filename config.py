@@ -5,12 +5,21 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _require_env(name: str) -> str:
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(
+            f"必要的環境變數 {name} 未設定，請參考 .env.example 建立 .env 檔案"
+        )
+    return value
+
+
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-jwt-secret-key")
+    SECRET_KEY = _require_env("SECRET_KEY")
+    JWT_SECRET_KEY = _require_env("JWT_SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///ecommerce.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_ACCESS_TOKEN_EXPIRES = 3600  # 1 小時
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     JWT_TOKEN_LOCATION = ["headers", "cookies"]
     JWT_COOKIE_CSRF_PROTECT = True
@@ -34,7 +43,7 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    JWT_ACCESS_TOKEN_EXPIRES = 300  # 測試時設置為 5 分鐘
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=5)
 
 
 config_map = {

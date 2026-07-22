@@ -5,9 +5,9 @@ from app.blueprints.auth.schemas import UserResponseSchema
 
 class UpdateUserSchema(Schema):
     username = fields.Str(validate=validate.Length(min=2, max=80))
-    password = fields.Str(validate=validate.Length(min=6))
+    password = fields.Str(validate=validate.Length(min=8))
     is_active = fields.Bool()
-    role = fields.Str(validate=validate.OneOf(['user', 'admin']))
+    role = fields.Str(validate=validate.OneOf(["user", "admin"]))
 
 
 class UserListResponseSchema(Schema):

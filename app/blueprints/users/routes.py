@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from flask_jwt_extended import get_jwt
 
+from app import limiter
 from app.blueprints.users import users_bp
 from app.blueprints.users.schemas import UpdateUserSchema
 from app.utils.decorators import admin_required, validate_body, owner_or_admin_required
@@ -8,6 +9,7 @@ from app.services import user_service
 
 
 @users_bp.route('', methods=['GET'])
+@limiter.limit('30 per minute')
 @admin_required
 def get_users():
     """
@@ -40,6 +42,7 @@ def get_users():
 
 
 @users_bp.route('/<int:user_id>', methods=['GET'])
+@limiter.limit('60 per minute')
 @owner_or_admin_required
 def get_user(user_id):
     """

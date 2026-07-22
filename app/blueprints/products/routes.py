@@ -1,6 +1,6 @@
 from flask import request, jsonify
 
-from app import db
+from app import db, limiter
 from app.models.product import Product
 from app.blueprints.products import products_bp
 from app.blueprints.products.schemas import (
@@ -13,6 +13,7 @@ from app.services import product_service
 
 
 @products_bp.route("", methods=["GET"])
+@limiter.limit("60 per minute")
 def get_products():
     """
     ---
@@ -62,6 +63,7 @@ def get_products():
 
 
 @products_bp.route("/<int:product_id>", methods=["GET"])
+@limiter.limit("120 per minute")
 def get_product(product_id):
     """
     ---
@@ -182,6 +184,7 @@ def delete_product(product_id):
 
 
 @products_bp.route("/<int:product_id>/inventory-logs", methods=["GET"])
+@limiter.limit("60 per minute")
 @admin_required
 def get_inventory_logs(product_id):
     """

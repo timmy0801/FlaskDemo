@@ -11,7 +11,11 @@ from config import config_map
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
-limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["300 per minute", "6000 per hour"],
+    storage_uri="memory://",
+)
 
 
 def create_app(env="default"):

@@ -90,6 +90,7 @@ def login(validated_data):
 
 
 @auth_bp.route('/me', methods=['GET'])
+@limiter.limit('60 per minute')
 @jwt_required()
 def get_current_user():
     """

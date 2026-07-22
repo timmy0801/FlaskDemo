@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
+from app import limiter
 from app.blueprints.orders import orders_bp
 from app.blueprints.orders.schemas import CreateOrderSchema, UpdateOrderStatusSchema
 from app.utils.decorators import validate_body
@@ -8,6 +9,7 @@ from app.services import order_service
 
 
 @orders_bp.route("", methods=["GET"])
+@limiter.limit("60 per minute")
 @jwt_required()
 def get_orders():
     """
@@ -41,6 +43,7 @@ def get_orders():
 
 
 @orders_bp.route("/<int:order_id>", methods=["GET"])
+@limiter.limit("60 per minute")
 @jwt_required()
 def get_order(order_id):
     """
